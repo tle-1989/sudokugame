@@ -369,21 +369,38 @@ function moveSelection(dr,dc){
 
 function enterNumber(num){
   if(!selected || solved) return;
+
   const { row, col } = selected;
+
+  // Don't allow editing given cells
   if(initialPuzzle[row][col]!==0) return;
-  puzzle[row][col] = num;
-  if(num!==0){
-    const cell = [...boardEl.children].find(el => Number(el.dataset.row)===row && Number(el.dataset.col)===col);
-    if(cell) cell.classList.add('correct-pop');
-    if(num!==solution[row][col]){
-      mistakes++;
-      showMessage('That number is not correct.', 'var(--bad)');
-    } else {
-      showMessage('Nice move.', 'var(--good)');
-    }
-  } else {
+
+  // If clearing, allow it
+  if(num === 0){
+    puzzle[row][col] = 0;
     showMessage('Cell cleared.');
+    renderBoard();
+    return;
   }
+
+  // ✅ ONLY allow correct numbers
+  if(num === solution[row][col]){
+    puzzle[row][col] = num;
+
+    const cell = [...boardEl.children].find(el =>
+      Number(el.dataset.row)===row &&
+      Number(el.dataset.col)===col
+    );
+
+    if(cell) cell.classList.add('correct-pop');
+
+    showMessage('Nice move.', 'var(--good)');
+  } else {
+    // ❌ Do nothing if wrong
+    showMessage('Incorrect number.', 'var(--bad)');
+    return;
+  }
+
   renderBoard();
   maybeCelebrate();
 }
